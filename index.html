@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CLICKER ARENA | 週間ランキング</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#151d33;--panel2:#1c2945;--text:#f3f6ff;--muted:#9eaccb;--blue:#63a7ff;--green:#54e0ad;--gold:#ffd36b;--line:#2c3b5d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -20%,#203b69 0,transparent 45%),var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+header{max-width:1100px;margin:auto;padding:25px 20px 10px;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.logo{font-weight:900;letter-spacing:2px;font-size:20px}.logo span{color:var(--blue)}
+button,input{font:inherit}button{border:0;border-radius:12px;padding:11px 15px;background:var(--blue);color:#071326;font-weight:800;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.danger{background:#4a2636;color:#ffdce5}
+main{max-width:1100px;margin:15px auto;padding:0 20px 45px;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.85fr);gap:18px}
+.panel{background:linear-gradient(150deg,#182440,#111a2e);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 12px 35px #0003}
+h1{font-size:clamp(25px,4vw,38px);margin:8px 0}.sub{color:var(--muted);font-size:14px}.score{text-align:center;padding:22px 0 12px}.score-num{font-size:clamp(42px,8vw,68px);font-weight:900;letter-spacing:-2px;font-variant-numeric:tabular-nums}.score-label{color:var(--muted);font-size:13px}
+.click-wrap{display:flex;justify-content:center;padding:20px 0 25px}.clicker{width:min(230px,60vw);aspect-ratio:1;border-radius:50%;font-size:29px;color:#071326;background:radial-gradient(circle at 35% 25%,#b8dcff,#65aaff 48%,#2870ce 100%);box-shadow:0 12px 0 #174b91,0 20px 40px #0007;transition:transform .08s;touch-action:manipulation}.clicker:active{transform:translateY(8px);box-shadow:0 4px 0 #174b91,0 10px 25px #0007}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{background:#0c1427;border:1px solid var(--line);border-radius:13px;padding:12px}.stat b{display:block;font-size:19px}.stat small{color:var(--muted)}
+.section-title{font-size:18px;margin:0 0 13px}.upgrade{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#0c1427;border:1px solid var(--line);padding:13px;border-radius:14px;margin:10px 0}.upgrade p{margin:3px 0;color:var(--muted);font-size:12px}.upgrade strong{display:block}.upgrade button{min-width:105px}.right-col{display:flex;flex-direction:column;gap:18px}.rank-row{display:grid;grid-template-columns:35px 1fr auto;gap:8px;align-items:center;padding:11px 2px;border-bottom:1px solid var(--line);font-size:14px}.rank-row:last-child{border:0}.rank-num{color:var(--gold);font-weight:900}.rank-score{font-variant-numeric:tabular-nums;color:#c5d7ff}.you{color:var(--green);font-weight:800}.auth{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.auth input{width:170px;max-width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0c1427;color:var(--text)}.status{font-size:13px;color:var(--muted);min-height:20px;margin-top:10px}.tabs{display:flex;gap:7px;margin-bottom:8px}.tabs button{flex:1}.tabs .active{background:var(--blue)}.note{font-size:12px;color:var(--muted);line-height:1.6}.hidden{display:none!important}
+@media(max-width:780px){main{grid-template-columns:1fr}.right-col{display:grid;grid-template-columns:1fr}.auth input{width:100%;flex:1}.panel{padding:16px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">CLICKER <span>ARENA</span></div>
+  <div class="auth" id="authArea">
+    <input id="email" type="email" placeholder="メールアドレス" autocomplete="email">
+    <input id="password" type="password" placeholder="パスワード" autocomplete="current-password">
+    <button id="loginBtn">ログイン</button><button class="secondary" id="signupBtn">新規登録</button>
+  </div>
+  <div id="userArea" class="auth hidden"><span id="userLabel"></span><button class="secondary" id="logoutBtn">ログアウト</button></div>
+</header>
+<main>
+  <section class="panel">
+    <div class="sub">今週のランキング対象スコア</div>
+    <div class="score"><div class="score-num" id="score">0</div><div class="score-label">POINTS</div></div>
+    <div class="click-wrap"><button class="clicker" id="clickBtn" disabled>CLICK!</button></div>
+    <div class="stats">
+      <div class="stat"><b id="perClick">1</b><small>1クリックの獲得量</small></div>
+      <div class="stat"><b id="perSecond">0</b><small>毎秒の自動獲得</small></div>
+      <div class="stat"><b id="totalClicks">0</b><small>累計クリック数</small></div>
+    </div>
+    <div style="height:22px"></div>
+    <h2 class="section-title">⚡ 強化ショップ</h2>
+    <div class="upgrade"><div><strong>クリック強化</strong><p>1クリックの獲得量を +1</p><small>レベル <span id="clickLevel">0</span></small></div><button id="buyClick" disabled>購入</button></div>
+    <div class="upgrade"><div><strong>自動クリック装置</strong><p>毎秒の自動獲得を +1</p><small>レベル <span id="autoLevel">0</span></small></div><button id="buyAuto" disabled>購入</button></div>
+    <div class="upgrade"><div><strong>デュアルショック</strong><p>1クリックの獲得量を現在の2倍にする</p><small>価格：1,000P</small></div><button id="buyDual" disabled>購入 1,000 P</button></div>
+    <div class="upgrade"><div><strong>ビギナーブースト</strong><p>所持ポイントが500P以下のとき、1クリックの獲得量 +25</p><small>価格：50P</small></div><button id="buyBeginner" disabled>購入 50 P</button></div>
+    <div class="status" id="gameStatus">ランキングに参加するには、新規登録またはログインしてください。</div>
+  </section>
+  <aside class="right-col">
+    <section class="panel">
+      <h2 class="section-title">🏆 オンラインランキング</h2>
+      <div class="sub" id="weekLabel">日間・週間・累計の3種類のランキング</div>
+      <div class="tabs">
+        <button class="secondary active" data-period="daily">日間</button>
+        <button class="secondary" data-period="weekly">週間</button>
+        <button class="secondary" data-period="alltime">累計</button>
+      </div>
+      <div class="sub" id="rankPeriodLabel">今日のランキング</div>
+      <div class="tabs"><button id="refreshBtn" class="secondary">ランキングを更新</button></div>
+      <div id="ranking"><div class="note">ログインするとランキングを表示できます。</div></div>
+    </section>
+    <section class="panel">
+      <h2 class="section-title">遊び方</h2>
+      <p class="note">① CLICK! を押してポイントを獲得。<br>② ポイントを使ってクリック強化や自動クリック装置を購入。<br>③ 今週のスコアでランキング上位を目指そう！</p>
+      <p class="note">ランキングは日本時間ではなく、データベースのUTC基準で毎週月曜日に切り替わります。ログイン中はゲームデータがオンライン保存されます。</p>
+    </section>
+  </aside>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/*
+  はじめに supabase-config.js を作成するか、下の2項目を入力してください。
+  Supabase Dashboard > Project Settings > API から取得できます。
+*/
+const SUPABASE_URL = window.SUPABASE_URL || "";
+const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "";
+const $ = id => document.getElementById(id);
+const fmt = n => Math.floor(Number(n)||0).toLocaleString("ja-JP");
+let client=null, user=null, game=null, pendingClicks=0, flushTimer=null, autoRefreshTimer=null, rankingPeriod="daily", syncing=false;
+
+function setStatus(msg){$("gameStatus").textContent=msg}
+function setAuthUI(loggedIn){
+  $("authArea").classList.toggle("hidden",loggedIn);
+  $("userArea").classList.toggle("hidden",!loggedIn);
+  $("clickBtn").disabled=!loggedIn;$("buyClick").disabled=!loggedIn;$("buyAuto").disabled=!loggedIn;
+  $("buyDual").disabled=!loggedIn;$("buyBeginner").disabled=!loggedIn;
+}
+function render(){
+  if(!game)return;
+  $("score").textContent=fmt(game.weekly_score);
+  $("perClick").textContent=fmt(game.click_power);
+  $("perSecond").textContent=fmt(game.auto_power);
+  $("totalClicks").textContent=fmt(game.total_clicks);
+  $("clickLevel").textContent=fmt(game.click_level);
+  $("autoLevel").textContent=fmt(game.auto_level);
+  $("buyClick").textContent="購入 "+fmt( clickCost())+" P";
+  $("buyAuto").textContent="購入 "+fmt(autoCost())+" P";
+  $("buyClick").disabled=!user || Number(game.points)<clickCost();
+  $("buyAuto").disabled=!user || Number(game.points)<autoCost();
+  $("buyDual").disabled=!user || Number(game.points)<1000;
+  $("buyBeginner").disabled=!user || Number(game.points)<50 || Number(game.points)>500;
+}
+function clickCost(){return Math.floor(25*Math.pow(1.55,Number(game?.click_level||0)))}
+function autoCost(){return Math.floor(100*Math.pow(1.65,Number(game?.auto_level||0)))}
+function requireConfig(){
+  if(!SUPABASE_URL || !SUPABASE_ANON_KEY){
+    setStatus("Supabaseの接続設定が必要です。READMEの手順に従って設定してください。");
+    return false;
+  }
+  return true;
+}
+async function loadGame(){
+  const {data,error}=await client.rpc("get_game_state");
+  if(error){setStatus("ゲームデータを読み込めません: "+error.message);return}
+  game=data;render();await loadRanking();
+}
+async function syncClicks(){
+  if(!user || pendingClicks<=0 || syncing)return;
+  syncing=true;
+  const count=Math.min(pendingClicks,100);pendingClicks-=count;
+  try{
+    const {data,error}=await client.rpc("click_game",{p_clicks:count});
+    if(error){pendingClicks+=count;setStatus("保存に失敗しました。接続を確認してください。");return}
+    game=data;render();loadRanking();
+  }finally{syncing=false;}
+}
+async function refreshAutoPoints(){
+  if(!user || syncing || pendingClicks>0)return;
+  const {data,error}=await client.rpc("get_game_state");
+  if(error){return;}
+  game=data;render();
+}
+async function buy(kind){
+  if(!user)return;
+  await syncClicks();
+  const {data,error}=await client.rpc("buy_upgrade",{p_kind:kind});
+  if(error){setStatus(error.message);return}
+  game=data;render();
+  const messages={click:"クリック強化を購入しました！",auto:"自動クリック装置を購入しました！",dual:"デュアルショックを購入！1クリックの獲得量が2倍になりました！",beginner:"ビギナーブーストを購入！1クリックの獲得量が25増えました！"};
+  setStatus(messages[kind]||"強化を購入しました！");
+}
+async function loadRanking(){
+  const {data,error}=await client.rpc("leaderboard",{p_period:rankingPeriod});
+  if(error){$("ranking").textContent="ランキングを読み込めません: "+error.message;return}
+  $("ranking").innerHTML="";
+  if(!data?.length){$("ranking").innerHTML='<div class="note">まだランキングデータがありません。</div>';return}
+  data.forEach((row,i)=>{
+    const div=document.createElement("div");div.className="rank-row";
+    const rank=document.createElement("span");rank.className="rank-num";rank.textContent=(i+1)+"位";
+    const name=document.createElement("span");name.textContent=row.display_name+(row.is_me?" (あなた)":"");if(row.is_me)name.className="you";
+    const score=document.createElement("span");score.className="rank-score";score.textContent=fmt(row.weekly_score)+" P";
+    div.append(rank,name,score);$("ranking").append(div);
+  });
+}
+async function afterAuth(){
+  const {data:{session}}=await client.auth.getSession();user=session?.user||null;
+  setAuthUI(!!user);
+  if(user){
+    $("userLabel").textContent=user.email;
+    const {error}=await client.rpc("get_game_state");
+    if(error){setStatus(error.message);return}
+    await loadGame();setStatus("オンライン保存中です。");
+    clearInterval(flushTimer);flushTimer=setInterval(syncClicks,1500);
+    clearInterval(autoRefreshTimer);autoRefreshTimer=setInterval(refreshAutoPoints,1000);
+  }else{
+    clearInterval(flushTimer);clearInterval(autoRefreshTimer);
+    game=null;$("score").textContent="0";$("ranking").innerHTML='<div class="note">ログインするとランキングを表示できます。</div>';
+    $("userLabel").textContent="";
+  }
+}
+async function auth(mode){
+  if(!client)return;
+  const email=$("email").value.trim(),password=$("password").value;
+  if(!email||!password){setStatus("メールアドレスとパスワードを入力してください。");return}
+  const result=mode==="signup"
+    ? await client.auth.signUp({email,password})
+    : await client.auth.signInWithPassword({email,password});
+  if(result.error){setStatus(result.error.message);return}
+  if(mode==="signup"&&!result.data.session){setStatus("確認メールを送信しました。メール内のリンクを開いてからログインしてください。");return}
+  await afterAuth();
+}
+$("loginBtn").onclick=()=>auth("login");
+$("signupBtn").onclick=()=>auth("signup");
+$("logoutBtn").onclick=async()=>{await syncClicks();await client.auth.signOut();clearInterval(flushTimer);await afterAuth()};
+$("clickBtn").onclick=()=>{
+  if(!user||!game)return;
+  pendingClicks++;game.weekly_score=Number(game.weekly_score)+Number(game.click_power);
+  game.points=Number(game.points)+Number(game.click_power);game.total_clicks=Number(game.total_clicks)+1;render();
+  if(pendingClicks>=25)syncClicks();
+};
+$("buyClick").onclick=()=>buy("click");
+$("buyAuto").onclick=()=>buy("auto");
+$("buyDual").onclick=()=>buy("dual");
+$("buyBeginner").onclick=()=>buy("beginner");
+$("refreshBtn").onclick=()=>loadRanking();
+$("weekLabel").textContent="日間：毎日 00:00 UTC／週間：毎週月曜 00:00 UTC／累計：リセットなし";
+$("rankPeriodLabel").textContent="今日のランキング";
+document.querySelectorAll("[data-period]").forEach(btn=>btn.addEventListener("click",()=>{
+  rankingPeriod=btn.dataset.period;
+  document.querySelectorAll("[data-period]").forEach(b=>b.classList.toggle("active",b===btn));
+  $("rankPeriodLabel").textContent=({daily:"今日のランキング",weekly:"今週のランキング",alltime:"累計ランキング"})[rankingPeriod];
+  loadRanking();
+}));
+if(window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY){
+  client=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  client.auth.onAuthStateChange(()=>setTimeout(afterAuth,0));afterAuth();
+}else{
+  setAuthUI(false);
+  setStatus("Supabase接続設定が未完了です。READMEを確認してください。");
+}
+window.addEventListener("beforeunload",()=>{if(pendingClicks>0)syncClicks()});
+</script>
+</body>
+</html>
